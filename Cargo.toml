@@ -1,0 +1,26 @@
+[workspace]
+members = [
+    "proxy-client",
+    "proxy-server",
+]
+
+[workspace.package]
+version = "0.1.0"
+edition = "2024"
+authors = ["Your Name <your.email@example.com>"]
+description = "A secure proxy tool with client and server components"
+license = "MIT"
+
+[workspace.dependencies]
+tokio = { version = "1.0", features = ["full"] }
+anyhow = "1.0"
+log = "0.4"
+env_logger = "0.10"
+bytes = "1.0"
+aes = "0.8"
+aes-gcm = "0.10"
+rand = "0.8"
+base64 = "0.21"
+serde = { version = "1.0", features = ["derive"] }
+serde_json = "1.0"
+uuid = { version = "1.0", features = ["v4"] } 
