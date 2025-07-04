@@ -1,7 +1,7 @@
 [workspace]
 members = [
     "proxy-client",
-    "proxy-server",
+    "proxy-server", "test/demo1",
 ]
 
 [workspace.package]

@@ -254,6 +254,10 @@ dependencies = [
 ]
 
 [[package]]
+name = "demo1"
+version = "0.1.0"
+
+[[package]]
 name = "env_logger"
 version = "0.10.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
