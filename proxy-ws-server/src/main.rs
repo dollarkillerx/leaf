@@ -15,7 +15,7 @@ use std::{
     time::Instant,
 };
 use tokio::{
-    io::AsyncWriteExt,
+    io::{AsyncReadExt, AsyncWriteExt},
     net::TcpStream,
     sync::RwLock,
 };
@@ -196,6 +196,29 @@ async fn handle_proxy_messages(
                             if let Err(e) = target.write_all(&data).await {
                                 error!("写入目标服务器时出错: {}", e);
                                 break;
+                            }
+                            
+                            // 读取目标服务器的响应并转发回客户端
+                            let mut buf = [0u8; 4096];
+                            match target.read(&mut buf).await {
+                                Ok(n) if n > 0 => {
+                                    let data_msg = WsMessage::Data(buf[..n].to_vec());
+                                    if let Ok(data_text) = serde_json::to_string(&data_msg) {
+                                        if let Err(e) = socket.send(Message::Text(data_text.into())).await {
+                                            error!("发送数据到客户端时出错: {}", e);
+                                            break;
+                                        }
+                                    }
+                                }
+                                Ok(0) => {
+                                    info!("目标服务器关闭连接");
+                                    break;
+                                }
+                                Ok(_) => {}
+                                Err(e) => {
+                                    error!("从目标服务器读取数据时出错: {}", e);
+                                    break;
+                                }
                             }
                         }
                     }

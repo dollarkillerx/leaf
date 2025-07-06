@@ -339,6 +339,31 @@ async fn forward_data_via_ws(
         .await?;
 
     // 等待代理响应
+    if let Some(Ok(msg)) = ws_stream.next().await {
+        if let TungsteniteMessage::Text(text) = msg {
+            match serde_json::from_str::<WsMessage>(&text) {
+                Ok(WsMessage::ProxyResponse(response)) => {
+                    if !response.success {
+                        error!("代理连接失败: {}", response.message);
+                        return Err(anyhow!("代理连接失败: {}", response.message));
+                    }
+                    info!("代理连接成功，开始数据转发");
+                }
+                _ => {
+                    error!("收到无效的代理响应");
+                    return Err(anyhow!("收到无效的代理响应"));
+                }
+            }
+        } else {
+            error!("收到非文本代理响应");
+            return Err(anyhow!("收到非文本代理响应"));
+        }
+    } else {
+        error!("未收到代理响应");
+        return Err(anyhow!("未收到代理响应"));
+    }
+
+    // 开始数据转发
     let (mut ws_sender, mut ws_receiver) = ws_stream.split();
 
     // 使用 Arc<Mutex<>> 来共享客户端连接
